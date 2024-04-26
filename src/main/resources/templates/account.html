@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto App Account</title>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+
+</head>
+<body>
+
+<nav>
+    <ul>
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/logout">Logout</a></li>
+    </ul>
+</nav>
+<!--<a href="/dashboard">Dashboard</a>-->
+<!--<br>-->
+<h2>Manage Account</h2>
+
+<div th:if="${error}">
+    <p th:text="${error}" style="color: red"></p>
+</div>
+
+<div th:if="${message}">
+    <p th:text="${message}" style="color: green"></p>
+</div>
+
+
+<div>Name: <span th:text="${name}"></span></div>
+<div>Username: <span th:text="${username}"></span></div>
+
+<div>
+    <form action="/account/changePassword" method="post">
+        <h3>Change Password</h3>
+        <div>
+            <label for="currentPassword">Current Password:</label>
+            <input id="currentPassword" name="currentPassword" type="text" required>
+        </div>
+        <div>
+            <label for="newPassword">New Password:</label>
+            <input id="newPassword" name="newPassword" type="text" required>
+        </div>
+        <button type="submit" style="display: inline-block;">Submit</button>
+    </form>
+    <hr>
+
+    <form action="/account/delete" method="post">
+        <h3>Delete Account</h3>
+        <div>
+            <label for="passwordConfirmation">Confirm password:</label>
+            <input id="passwordConfirmation" name="passwordConfirmation" type="text" required>
+        </div>
+        <button type="submit" style="display: inline-block;">Submit</button>
+    </form>
+    <hr>
+</div>
+</body>
+</html>
+

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto App Keys</title>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+
+    <script>
+        function deleteKey(keyId) {
+            fetch(`/deleteKey/${keyId}`, {
+                method: 'POST'
+            }).then( response => {
+                if (response.ok) {
+                    const keyElem = document.getElementById(`key_${keyId}`);
+                    keyElem.remove();
+                    alert("Deleted key");
+                }else {
+                    alert('Failed to delete key');
+                }
+            });
+        }
+
+        function downloadKey(keyId) {
+            const keyElem = document.getElementById(`key_${keyId}`);
+            const keyType = keyElem.children[1].innerText;
+            const keyName = keyElem.children[0].innerText;
+            fetch(`/downloadKey/${keyId}`)
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(new Blob([blob]));
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${keyName}.${keyType}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                });
+        }
+    </script>
+</head>
+<body>
+
+    <nav>
+        <ul>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+
+    <h2>Crypto App Keys</h2>
+
+    <div th:if="${error}">
+        <p th:text="${error}" style="color: red"></p>
+    </div>
+
+    <div th:if="${message}">
+        <p th:text="${message}"></p>
+    </div>
+
+    <form action="/createKey" method="post" style="margin: 20px; padding: 0; * {margin: 0; padding: 0;}">
+        <h3>Create Key</h3>
+        <div>
+            <label for="keyName">Nickname:</label>
+            <input type="text" name="keyName" id="keyName">
+        </div>
+
+        <div style="display: inline-block;">
+            <label for="keySelect">Key Type:</label>
+            <select id="keySelect" name="keySelect" required>
+                <option value="">Select option</option>
+                <option th:each="option : ${keyOptions}"
+                        th:value="${option}"
+                        th:text="${option}"></option>
+            </select>
+        </div>
+
+        <div style="display: inline-block;">
+            <button type="submit">Generate</button>
+        </div>
+    </form>
+
+    <div id="keys" th:if="${keys}">
+        <hr>
+        <h3>Your Keys:</h3>
+        <table style="width: auto;">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Type</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="key, iter : ${keys}" th:id="'key_' + ${key.id}">
+<!--                <td th:text="${iter.count}" style="max-width: 20px;"></td>-->
+                <td th:text="${key.name != null && key.name != '' ? key.name : key.id}"></td>
+                <td th:text="${key.type}"></td>
+                <td>
+                    <button th:onclick="'downloadKey(' + ${key.id} + ')'" style="display: inline-block;">Download</button>
+                    <button th:onclick="'deleteKey(' + ${key.id} + ')'" style="display: inline-block;">X</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+
+
+</html>

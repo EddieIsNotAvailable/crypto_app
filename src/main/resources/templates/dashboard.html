@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto App Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+
+    <h2>Crypto App Dashboard</h2>
+
+    <div th:if="${error}">
+        <p th:text="${error}" style="color: red"></p>
+    </div>
+
+    <div th:if="${message}">
+        <p th:text="${message}"></p>
+    </div>
+
+    <ul>
+        <li><a href="/logout">Logout</a></li>
+        <li><a href="/account">Manage Account</a></li>
+        <li><a href="/keys">Manage Keys</a></li>
+        <li><a href="/files">Manage Files</a></li>
+    </ul>
+
+</body>
+</html>

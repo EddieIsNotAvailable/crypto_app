@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto App Files</title>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+
+    <script>
+        function deleteFile(fileId) {
+            fetch(`/deleteFile/${fileId}`, {
+                method: 'POST'
+            }).then( response => {
+                if (response.ok) {
+                    const fileElem = document.getElementById(`file_${fileId}`);
+                    fileElem.remove();
+                    alert("Deleted file");
+                }else {
+                    alert('Failed to delete file');
+                }
+            });
+        }
+
+        function downloadFile(fileId) {
+            const fileElem = document.getElementById(`file_${fileId}`);
+            const fileName = fileElem.querySelector('span').textContent.split(' - ')[0];
+            fetch(`/downloadFile/${fileId}`)
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(new Blob([blob]));
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${fileName}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                });
+        }
+    </script>
+
+</head>
+<body>
+
+    <nav>
+        <ul>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+
+    <h2>Crypto App Files</h2>
+
+    <div th:if="${error}">
+        <p th:errors="${error}" style="color: red"></p>
+    </div>
+
+    <div th:if="${message}">
+        <p th:text="${message}"></p>
+    </div>
+
+    <h3>Upload File:</h3>
+
+    <span>Note: 1mb upload limit</span>
+
+    <form action="/uploadFile" method="post" enctype="multipart/form-data" style="margin: 20px; padding: 0; * {margin: 0; padding: 0;}">
+        <input type="file" name="file" required>
+        <button type="submit" style="display: inline-block;">Upload</button>
+    </form>
+
+    <div th:if="${files}">
+        <hr>
+        <h3>Your Files:</h3>
+        <div>
+            <span style="margin-left: 50px;"><strong>File Name - Content Type - Size</strong></span>
+        </div>
+        <ol>
+            <li th:each="file : ${files}" th:id="'file_' + ${file.id}">
+                <div>
+                    <span th:text="${file.fileName + ' - ' + file.fileType} + ' - ' + ${file.fileSize}"></span>
+                    <button th:onclick="'downloadFile(' + ${file.id} + ')'" style="display: inline-block;">Download</button>
+                    <button th:onclick="'deleteFile(' + ${file.id} + ')'" style="display: inline-block;">X</button>
+                </div>
+                <br>
+                <ul style="margin-left: 10px;">
+                    <li th:each="fileHash : ${file.fileHashes}">
+                        <span th:text="${fileHash.hashType} + ': ' + ${fileHash.hash}"></span>
+                    </li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+</body>
+</html>
