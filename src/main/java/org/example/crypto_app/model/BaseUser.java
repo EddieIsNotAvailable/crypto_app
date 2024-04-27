@@ -27,11 +27,9 @@ public class BaseUser implements UserDetails {
     @NotNull @NonNull
     private String password;
 
-//    @OneToMany( cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CryptoKey> keys = new ArrayList<>();
 
-//    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserFile> files = new ArrayList<>();
 

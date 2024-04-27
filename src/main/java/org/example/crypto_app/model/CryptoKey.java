@@ -1,7 +1,6 @@
 package org.example.crypto_app.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,10 +17,10 @@ public class CryptoKey {
 
     private String name;
 
-    @NotNull
     private SecretKey secretKey;
 
-    @NotNull
+    private byte[] iv;
+
     @Enumerated(EnumType.STRING)
     private EncryptionType type;
 
@@ -30,11 +29,5 @@ public class CryptoKey {
         this.secretKey = secretKey;
         this.type = type;
     }
-
-//    public String getSecretKey() {
-//        Base64.Encoder encoder = Base64.getEncoder();
-//        return encoder.encodeToString(secretKey.getEncoded());
-//    }
-
 
 }

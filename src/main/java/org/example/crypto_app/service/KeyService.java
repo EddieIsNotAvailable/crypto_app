@@ -59,15 +59,15 @@ public class KeyService {
                     keyGenerator.init(192);
                     break;
                 case DES:
-                    keyGenerator = KeyGenerator.getInstance("DES");
-                    keyGenerator.init(56);
+                    keyGenerator = KeyGenerator.getInstance("TripleDES");
+                    keyGenerator.init(112);
                     break;
                 case BLOWFISH:
                     keyGenerator = KeyGenerator.getInstance("Blowfish");
                     keyGenerator.init(128);
                     break;
                 default:
-                    throw new RuntimeException("Invalid Key Type");
+                    throw new RuntimeException("Invalid Key Type:" + type);
             }
             return keyGenerator.generateKey();
         } catch (NoSuchAlgorithmException e) {
@@ -78,11 +78,9 @@ public class KeyService {
     @Transactional
     public void deleteKey(Long keyId) {
         BaseUser user = getUser();
-        CryptoKey key = user.getKeys().stream().filter(k -> k.getId().equals(keyId)).findFirst().orElse(null);
-        if(key != null) {
-            user.getKeys().remove(key);
-            baseUserRepository.save(user);
-        } else throw new RuntimeException("Key not found");
+        CryptoKey key = user.getKeys().stream().filter(k -> k.getId().equals(keyId)).findFirst().orElseThrow(() -> new RuntimeException("Key not found"));
+        user.getKeys().remove(key);
+        baseUserRepository.save(user);
     }
 
     @Transactional

@@ -7,13 +7,14 @@
 
     <script>
         function deleteFile(fileId) {
+            const start = performance.now();
             fetch(`/deleteFile/${fileId}`, {
                 method: 'POST'
             }).then( response => {
                 if (response.ok) {
                     const fileElem = document.getElementById(`file_${fileId}`);
                     fileElem.remove();
-                    alert("Deleted file");
+                    alert(`Deleted file in  + ${(performance.now() - start).toFixed(2)} ms`);
                 }else {
                     alert('Failed to delete file');
                 }
@@ -21,6 +22,7 @@
         }
 
         function downloadFile(fileId) {
+            const start = performance.now();
             const fileElem = document.getElementById(`file_${fileId}`);
             const fileName = fileElem.querySelector('span').textContent.split(' - ')[0];
             fetch(`/downloadFile/${fileId}`)
@@ -34,6 +36,26 @@
                     a.click();
                     window.URL.revokeObjectURL(url);
                 });
+            alert(`Downloaded file in  + ${(performance.now() - start).toFixed(2)} ms`);
+        }
+
+        //Download the decrypted file
+        function decryptFile(fileId) {
+            const start = performance.now();
+            const fileElem = document.getElementById(`file_${fileId}`);
+            const fileName = fileElem.querySelector('span').textContent.split(' - ')[0];
+            fetch(`/decryptFile/${fileId}`)
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(new Blob([blob]));
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${fileName}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                });
+            alert(`Decrypted file in  + ${(performance.now() - start).toFixed(2)} ms`);
         }
     </script>
 
@@ -61,9 +83,21 @@
 
     <span>Note: 1mb upload limit</span>
 
-    <form action="/uploadFile" method="post" enctype="multipart/form-data" style="margin: 20px; padding: 0; * {margin: 0; padding: 0;}">
+    <form action="/uploadFile" method="post" enctype="multipart/form-data" id="uploadForm" style="margin: 20px; padding: 0; * {margin: 0; padding: 0;}">
         <input type="file" name="file" required>
-        <button type="submit" style="display: inline-block;">Upload</button>
+<!--        <div th:if="${keys}">-->
+            <label for="keyId">Select Key (optional):</label>
+            <select name="keyId" id="keyId">
+            <option value="">Select Key</option>
+            <option th:each="key : ${keys}" th:value="${key.id}" th:text="${key.name + ' - ' + key.type}"></option>
+        </select>
+<!--        </div>-->
+        <button type="submit" id="uploadFileSubmit" style="display: inline-block;">Upload and Encrypt</button>
+        <div th:if="${responseTime}">
+            <br>
+            <div th:text="${responseTime}"></div>
+        </div>
+
     </form>
 
     <div th:if="${files}">
@@ -78,6 +112,12 @@
                     <span th:text="${file.fileName + ' - ' + file.fileType} + ' - ' + ${file.fileSize}"></span>
                     <button th:onclick="'downloadFile(' + ${file.id} + ')'" style="display: inline-block;">Download</button>
                     <button th:onclick="'deleteFile(' + ${file.id} + ')'" style="display: inline-block;">X</button>
+<!--                    <button th:onclick="'encryptFile(' + ${file.id} + ')'" style="display: inline-block;">Encrypt</button>-->
+                </div>
+                <div th:if="${file.skey}">
+                    <br>
+                    <span th:text="'Encrypted with Key: ' + ${file.skey.name + ' - ' + file.skey.type}"></span>
+                    <button th:onclick="'decryptFile(' + ${file.id} + ')'" style="display: inline-block;">Decrypt</button>
                 </div>
                 <br>
                 <ul style="margin-left: 10px;">
@@ -85,6 +125,7 @@
                         <span th:text="${fileHash.hashType} + ': ' + ${fileHash.hash}"></span>
                     </li>
                 </ul>
+                <br>
             </li>
         </ol>
     </div>

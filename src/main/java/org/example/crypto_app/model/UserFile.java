@@ -15,30 +15,24 @@ public class UserFile {
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @NotNull
   private String fileName;
 
-  @NotNull
   private String fileType;
-
-  @NotNull
-  private Long fileSize;
 
   @ManyToOne
   @JoinColumn(name = "key_id")
   private CryptoKey key;
 
-  @Lob @NotNull @Basic(fetch = FetchType.LAZY)
-  private byte [] fileContent;
+  @Lob
+  @Basic(fetch = FetchType.LAZY)
+  private byte[] fileContent;
 
-//  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   private List<FileHash> fileHashes;
 
   public UserFile(String fileName, String fileType, byte[] bytes) {
     this.fileName = fileName;
     this.fileType = fileType;
-    this.fileSize = (long) bytes.length;
     this.fileContent = bytes;
   }
 

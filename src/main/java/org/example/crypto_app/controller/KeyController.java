@@ -32,7 +32,7 @@ public class KeyController {
                 model.addAttribute("keys", keys);
             }
         } catch (RuntimeException e) {
-            System.out.println("Error loading keys page: " + e.getMessage());
+//            System.out.println("Error loading keys page: " + e.getMessage());
             model.addAttribute("error", e.getMessage());
         }
 
@@ -45,22 +45,20 @@ public class KeyController {
         try {
             keyService.createKey(keyName, keySelect);
             model.addAttribute("message", keySelect + " key created successfully");
-            System.out.println("Key created successfully for user: " + user.getUsername());
+//            System.out.println("Key created successfully for user: " + user.getUsername());
         } catch (RuntimeException e) {
-            System.out.println("Error creating key: " + e.getMessage());
+//            System.out.println("Error creating key: " + e.getMessage());
             model.addAttribute("error", e.getMessage());
         }
         return "redirect:/keys";
     }
 
     @PostMapping("/deleteKey/{keyId}")
-    public String deleteKey(@PathVariable Long keyId, RedirectAttributes redirectAttributes) {
+    public String deleteKey(@PathVariable Long keyId) {
         try {
             keyService.deleteKey(keyId);
-            redirectAttributes.addFlashAttribute("message", "Key deleted successfully");
         } catch (RuntimeException e) {
-            System.out.println("Error deleting key: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+//            System.out.println("Error deleting key: " + e.getMessage());
         }
         return "keys";
     }
@@ -71,7 +69,7 @@ public class KeyController {
             byte[] keyBytes = keyService.downloadKey(keyId);
             return ResponseEntity.ok().body(keyBytes);
         } catch (RuntimeException e) {
-            System.out.println("Error downloading key: " + e.getMessage());
+//            System.out.println("Error downloading key: " + e.getMessage());
             model.addAttribute("error", e.getMessage());
             return ResponseEntity.badRequest().build();
         }

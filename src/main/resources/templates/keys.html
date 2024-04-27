@@ -7,13 +7,14 @@
 
     <script>
         function deleteKey(keyId) {
+            const start = performance.now();
             fetch(`/deleteKey/${keyId}`, {
                 method: 'POST'
             }).then( response => {
                 if (response.ok) {
                     const keyElem = document.getElementById(`key_${keyId}`);
                     keyElem.remove();
-                    alert("Deleted key");
+                    alert(`Deleted key in ${(performance.now() - start).toFixed(2)} ms`);
                 }else {
                     alert('Failed to delete key');
                 }
@@ -21,6 +22,7 @@
         }
 
         function downloadKey(keyId) {
+            const start = performance.now();
             const keyElem = document.getElementById(`key_${keyId}`);
             const keyType = keyElem.children[1].innerText;
             const keyName = keyElem.children[0].innerText;
@@ -35,6 +37,7 @@
                     a.click();
                     window.URL.revokeObjectURL(url);
                 });
+            alert(`Downloaded key in ${(performance.now() - start).toFixed(2)} ms`);
         }
     </script>
 </head>
@@ -82,6 +85,7 @@
     <div id="keys" th:if="${keys}">
         <hr>
         <h3>Your Keys:</h3>
+        <span>Note: Keys can't be deleted if used in a stored file.</span>
         <table style="width: auto;">
             <thead>
             <tr>
