@@ -19,8 +19,6 @@ public class CryptoKey {
 
     private SecretKey secretKey;
 
-    private byte[] iv;
-
     @Enumerated(EnumType.STRING)
     private EncryptionType type;
 

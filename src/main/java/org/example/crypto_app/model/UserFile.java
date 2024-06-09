@@ -19,6 +19,8 @@ public class UserFile {
 
   private String fileType;
 
+  private byte[] iv;
+
   @ManyToOne
   @JoinColumn(name = "key_id")
   private CryptoKey key;

@@ -10,15 +10,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.*;
-import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.spec.InvalidParameterSpecException;
 import java.util.List;
 
 @Service
@@ -41,12 +37,6 @@ public class FileService {
         return baseUserRepository.findById(user.getId()).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-//    @Transactional
-//    public List<UserFile> getUserFiles() {
-//        BaseUser user = getUser();
-//        return user.getFiles();
-//    }
-
     @Transactional
     public void saveFile(UserFile file) {
         BaseUser user = getUser();
@@ -65,20 +55,43 @@ public class FileService {
             throw new RuntimeException("File limit (" + MAX_FILES + ") reached");
         }
 
-        CryptoKey userKey = user.getKeys().stream()
+        CryptoKey key = user.getKeys().stream()
                 .filter(k -> k.getId().equals(keyId))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Key not found"));
 
         try {
-            file.setFileContent(encryptFileContent(file.getFileContent(), userKey));
+            byte[] iv = null;
+            file.setFileContent(transformFileContent(file.getFileContent(), key, iv, Cipher.ENCRYPT_MODE));
+            file.setIv(iv);
+            file.setKey(key);
+            file.generateHashes();
+            user.getFiles().add(file);
+            baseUserRepository.save(user);
         } catch (Exception e) {
             throw new RuntimeException("Error encrypting file: " + e.getMessage());
         }
-        file.setKey(userKey);
-        file.generateHashes();
-        user.getFiles().add(file);
-        baseUserRepository.save(user);
+    }
+
+    @Transactional
+    public byte[] decryptAndReturnFile(Long fileId) {
+        BaseUser user = getUser();
+
+        UserFile file = baseUserRepository.getUserFile(user.getId(), fileId)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("File not found"));
+
+        CryptoKey key = file.getKey();
+        assert key != null : "File not encrypted";
+        byte[] iv = file.getIv();
+        assert iv != null : "Cannot decrypt unencrypted file";
+
+        try {
+            return transformFileContent(file.getFileContent(), key, iv, Cipher.DECRYPT_MODE);
+        } catch (Exception e) {
+            throw new RuntimeException("Error decrypting file: " + e.getMessage());
+        }
     }
 
     @Transactional
@@ -92,11 +105,6 @@ public class FileService {
     }
 
     @Transactional
-    public byte[] getFileContent(Long fileId) {
-        return getFile(fileId).getFileContent();
-    }
-
-    @Transactional
     public List<FileInfoDTO> getUserFilesInfo() {
         BaseUser user = getUser();
         return user.getFiles().stream()
@@ -107,12 +115,13 @@ public class FileService {
     @Transactional
     public void deleteFile(Long fileId) {
         BaseUser user = getUser();
-        user.getFiles().removeIf(file -> file.getId().equals(fileId));
-        baseUserRepository.save(user);
+        if(!baseUserRepository.deleteFileById(user.getId(), fileId)) {
+            throw new RuntimeException("File not found");
+        }
     }
 
-    public byte[] transformFileContent(byte[] fileContent, CryptoKey key, int mode) throws IOException {
-        if(mode != Cipher.ENCRYPT_MODE && mode != Cipher.DECRYPT_MODE) {
+    public byte[] transformFileContent(byte[] fileContent, CryptoKey key, byte[] iv, int mode) throws IOException {
+        if (mode != Cipher.ENCRYPT_MODE && mode != Cipher.DECRYPT_MODE) {
             throw new RuntimeException("Invalid encryption mode");
         }
         Cipher cipher;
@@ -123,9 +132,6 @@ public class FileService {
                     break;
                 case DES:
                     cipher = Cipher.getInstance("TripleDES/CBC/PKCS5Padding");
-//                    DESKeySpec desKeySpec = new DESKeySpec(key.getSecretKey().getEncoded());
-//                    SecretKey desKey = SecretKeyFactory.getInstance("DES").generateSecret(desKeySpec);
-//                    key.setSecretKey(desKey);
                     break;
                 case BLOWFISH:
                     cipher = Cipher.getInstance("Blowfish/CBC/PKCS5Padding");
@@ -137,20 +143,18 @@ public class FileService {
             throw new RuntimeException("Error initializing cipher: " + e.getMessage());
         }
 
-        if(mode == Cipher.ENCRYPT_MODE) {
+        if (mode == Cipher.ENCRYPT_MODE) {
             try {
-                cipher.init(mode, key.getSecretKey());
+                cipher.init(Cipher.ENCRYPT_MODE, key.getSecretKey());
                 AlgorithmParameters params = cipher.getParameters();
-                key.setIv(params.getParameterSpec(IvParameterSpec.class).getIV());
-
-            } catch (InvalidKeyException | InvalidParameterSpecException e) {
+                iv = params.getParameterSpec(IvParameterSpec.class).getIV();
+            } catch (Exception e) {
                 throw new RuntimeException("Error initializing cipher for encryption: " + e.getMessage());
             }
-        } else { //mode == Cipher.DECRYPT_MODE
+        } else {
             try {
-                cipher.init(Cipher.DECRYPT_MODE, key.getSecretKey(), new IvParameterSpec(key.getIv()));
-
-            } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
+                cipher.init(Cipher.DECRYPT_MODE, key.getSecretKey(), new IvParameterSpec(iv));
+            } catch (Exception e) {
                 throw new RuntimeException("Error initializing cipher for decryption: " + e.getMessage());
             }
         }
@@ -174,88 +178,5 @@ public class FileService {
         }
 
         return outputStream.toByteArray();
-
-
-//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//        CipherOutputStream cipherOutputStream = new CipherOutputStream(outputStream, cipher);
-//        try {
-//            cipherOutputStream.write(fileContent);
-//            cipherOutputStream.close();
-//            return outputStream.toByteArray();
-//        } catch (Exception e) {
-//            throw new RuntimeException("Error encrypting file: " + e.getMessage());
-//        }
     }
-
-//    @Transactional
-//    public void encryptFile(Long fileId, Long keyId) {
-//        BaseUser user = getUser();
-//        UserFile file = getFile(fileId);
-//        CryptoKey key = user.getKeys().stream()
-//                .filter(k -> k.getId().equals(keyId))
-//                .findFirst()
-//                .orElseThrow(() -> new RuntimeException("Key not found"));
-//
-//        byte[] encrytedContent = encryptFileContent(file.getFileContent(), key, Cipher.ENCRYPT_MODE);
-//        UserFile newFile = new UserFile(file.getFileName(), file.getFileType(), encrytedContent);
-//        newFile.setKey(key);
-//        newFile.generateHashes();
-//
-//        user.getFiles().add(newFile);
-//        baseUserRepository.save(user);
-//    }
-
-    @Transactional
-    public byte[] decryptAndReturnFile(Long fileId) {
-        BaseUser user = getUser();
-        UserFile file = getFile(fileId);
-        CryptoKey key = file.getKey();
-        assert key != null : "File not encrypted";
-
-        byte[] out;
-        try {
-            out = decryptFileContent(file.getFileContent(), key);
-        } catch (Exception e) {
-            throw new RuntimeException("Error decrypting file: " + e.getMessage());
-        }
-        return out;
-    }
-
-
-//    @Transactional
-//    public void updateFile(Long fileId, UserFile file) {
-//        BaseUser user = getUser();
-//        UserFile oldFile = getFile(fileId);
-//        oldFile.setFileName(file.getFileName());
-//        oldFile.setFileContent(file.getFileContent());
-//        baseUserRepository.save(user);
-//    }
-
-    @Transactional
-    public byte[] encryptFileContent(byte[] fileContent, CryptoKey key) throws Exception {
-        byte[] encryptedContent = transformFileContent(fileContent, key, Cipher.ENCRYPT_MODE);
-        byte[] iv = key.getIv();
-        byte[] result = new byte[iv.length + encryptedContent.length];
-        System.arraycopy(iv, 0, result, 0, iv.length);
-        System.arraycopy(encryptedContent, 0, result, iv.length, encryptedContent.length);
-        return result;
-    }
-
-    @Transactional
-    public byte[] decryptFileContent(byte[] fileContent, CryptoKey key) throws Exception {
-//        System.out.println("In decryption");
-//        System.out.println("Saved IV: " + new String(key.getIv()));
-        int ivSize = key.getIv().length;
-        byte[] iv = new byte[ivSize];
-        System.arraycopy(fileContent, 0, iv, 0, ivSize);
-//        key.setIv(iv);
-//        System.out.println("IV from file: " + new String(iv));
-
-        byte[] encryptedContent = new byte[fileContent.length - ivSize];
-        System.arraycopy(fileContent, ivSize, encryptedContent, 0, encryptedContent.length);
-        return transformFileContent(encryptedContent, key, Cipher.DECRYPT_MODE);
-    }
-
-
-
 }

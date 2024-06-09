@@ -54,13 +54,14 @@ public class KeyController {
     }
 
     @PostMapping("/deleteKey/{keyId}")
-    public String deleteKey(@PathVariable Long keyId) {
+    public ResponseEntity<?> deleteKey(@PathVariable Long keyId) {
         try {
             keyService.deleteKey(keyId);
         } catch (RuntimeException e) {
 //            System.out.println("Error deleting key: " + e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return "keys";
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/downloadKey/{keyId}")

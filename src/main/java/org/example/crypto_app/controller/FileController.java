@@ -34,12 +34,10 @@ public class FileController {
     public String files(Model model) {
         try {
             List<FileInfoDTO> filesInfo = fileService.getUserFilesInfo();
-
             if(!filesInfo.isEmpty()) model.addAttribute("files", filesInfo);
 
             List<CryptoKey> keys = keyService.getUserKeys();
             if(!keys.isEmpty()) model.addAttribute("keys", keys);
-
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
             System.out.println("Error loading files page: " + e.getMessage());
@@ -47,6 +45,7 @@ public class FileController {
         return "files";
     }
 
+    //For uploading files, with support for encrypting it
     @PostMapping("/uploadFile")
     public RedirectView upload(@NotNull MultipartFile file, Long keyId, RedirectAttributes re) {
         long startTime = System.currentTimeMillis();
@@ -66,20 +65,6 @@ public class FileController {
         }
     }
 
-//    @PostMapping("/uploadFile")
-//    public String upload(MultipartFile file) {
-//        System.out.println("In uploadFile");
-//
-//        try {
-//            UserFile newFile = new UserFile(file.getOriginalFilename(), file.getContentType(), file.getBytes());
-//            fileService.saveFile(newFile);
-//        } catch(Exception e) {
-//            return "files";
-//        }
-//
-//        return "files";
-//    }
-
     @PostMapping("/deleteFile/{fileId}")
     public RedirectView delete(@PathVariable Long fileId, RedirectAttributes redirectAttributes) {
         try {
@@ -94,7 +79,7 @@ public class FileController {
     @GetMapping("/downloadFile/{fileId}")
     public ResponseEntity<byte[]> download(@PathVariable Long fileId) {
         try {
-            byte[] file = fileService.getFileContent(fileId);
+            byte[] file = fileService.getFile(fileId).getFileContent();
             return ResponseEntity.ok().body(file);
         } catch (Exception e) {
 //            System.out.println("Error downloading file: " + e.getMessage());
@@ -112,15 +97,5 @@ public class FileController {
             return ResponseEntity.notFound().build();
         }
     }
-
-//    @PostMapping("/encryptFile/{fileId}/{keyId}")
-//    public ResponseEntity<String> encrypt(@PathVariable Long fileId, @PathVariable Long keyId) {
-//        try {
-//            fileService.encryptFile(fileId, keyId);
-//            return ResponseEntity.ok().build();
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest().body(e.getMessage());
-//        }
-//    }
 
 }
