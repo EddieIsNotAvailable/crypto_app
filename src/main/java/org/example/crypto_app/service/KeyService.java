@@ -13,6 +13,7 @@ import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+
 @Service
 public class KeyService {
 
@@ -86,21 +87,8 @@ public class KeyService {
     @Transactional
     public byte[] downloadKey(Long keyId) {
         BaseUser user = getUser();
-        CryptoKey key = user.getKeys().stream().filter(k -> k.getId().equals(keyId)).findFirst().orElse(null);
-        assert key != null : "Key not found";
+        CryptoKey key = baseUserRepository.getKeyById(user.getId(), keyId).orElseThrow(() -> new RuntimeException("Key not found"));
         return key.getSecretKey().getEncoded();
     }
-
-    //Bad approach. Should get key through keys of user to implicitly require key id belongs to user
-
-//    public byte[] downloadKey(Long keyId) {
-//        System.out.println("In downloadKey service");
-//        CryptoKey key = keyRepository.findById(keyId).orElseThrow(() -> new RuntimeException("Key not found"));
-//        return key.getSecretKey().getEncoded();
-//    }
-
-
-
-
 
 }

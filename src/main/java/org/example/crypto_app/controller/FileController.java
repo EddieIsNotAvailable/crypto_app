@@ -60,7 +60,6 @@ public class FileController {
             return new RedirectView("/files", true);
         } catch(Exception e) {
             re.addFlashAttribute("error", e.getMessage());
-//            System.out.println("Error uploading file: " + e.getMessage());
             return new RedirectView("/files", true);
         }
     }
@@ -71,7 +70,7 @@ public class FileController {
             fileService.deleteFile(fileId);
             redirectAttributes.addFlashAttribute("message", "File deleted successfully");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Failed to delete file");
         }
         return new RedirectView("/files", true);
     }
@@ -82,7 +81,6 @@ public class FileController {
             byte[] file = fileService.getFile(fileId).getFileContent();
             return ResponseEntity.ok().body(file);
         } catch (Exception e) {
-//            System.out.println("Error downloading file: " + e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
@@ -93,7 +91,6 @@ public class FileController {
             byte[] file = fileService.decryptAndReturnFile(fileId);
             return ResponseEntity.ok().body(file);
         } catch (Exception e) {
-//            System.out.println("Error decrypting file: " + e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }

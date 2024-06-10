@@ -59,7 +59,7 @@ public class KeyController {
             keyService.deleteKey(keyId);
         } catch (RuntimeException e) {
 //            System.out.println("Error deleting key: " + e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body("Failed to delete key");
         }
         return ResponseEntity.ok().build();
     }

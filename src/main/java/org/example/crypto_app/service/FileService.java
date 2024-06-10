@@ -115,9 +115,8 @@ public class FileService {
     @Transactional
     public void deleteFile(Long fileId) {
         BaseUser user = getUser();
-        if(!baseUserRepository.deleteFileById(user.getId(), fileId)) {
-            throw new RuntimeException("File not found");
-        }
+        user.getFiles().removeIf(file -> file.getId().equals(fileId));
+        baseUserRepository.save(user);
     }
 
     public byte[] transformFileContent(byte[] fileContent, CryptoKey key, byte[] iv, int mode) throws IOException {
