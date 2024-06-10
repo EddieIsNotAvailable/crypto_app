@@ -32,9 +32,9 @@ public class UserService {
     }
 
     public void changePassword(BaseUser user, String currentPassword, String newPassword) {
-        currentPassword = passwordEncoder.encode(currentPassword);
         newPassword = passwordEncoder.encode(newPassword);
         if(passwordEncoder.matches(currentPassword, user.getPassword())) {
+            System.out.println("Passwords matched!");
             user.setPassword(newPassword);
             baseUserRepository.save(user);
         } else throw new IllegalArgumentException("Incorrect Password");
