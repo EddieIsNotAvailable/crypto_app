@@ -92,7 +92,7 @@
             <option th:each="key : ${keys}" th:value="${key.id}" th:text="${key.name + ' - ' + key.type}"></option>
         </select>
 <!--        </div>-->
-        <button type="submit" id="uploadFileSubmit" style="display: inline-block;">Upload and Encrypt</button>
+        <button type="submit" id="uploadFileSubmit" style="display: inline-block;">Upload</button>
         <div th:if="${responseTime}">
             <br>
             <div th:text="${responseTime}"></div>
@@ -130,4 +130,14 @@
         </ol>
     </div>
 </body>
+<script>
+    const keySelector = document.getElementById("keyId");
+    const uploadFileSubmit = document.getElementById("uploadFileSubmit");
+    //If key is selected, change the button to say "Upload and Encrypt"
+    keySelector.addEventListener('change', () => {
+        if (keySelector.value) uploadFileSubmit.innerText = "Upload and Encrypt";
+        else uploadFileSubmit.innerText = "Upload";
+    });
+
+</script>
 </html>
