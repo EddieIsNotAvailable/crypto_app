@@ -2,7 +2,6 @@ package org.example.crypto_app.config;
 
 import org.example.crypto_app.repository.BaseUserRepository;
 import org.example.crypto_app.service.UserDetailsServiceImpl;
-import org.example.crypto_app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,13 +39,6 @@ public class SecurityConfig {
                     .requestMatchers("/", "/login", "/signup/**", "/h2-console/**").permitAll()
                     .anyRequest().authenticated()
             )
-//            .formLogin(formLogin ->
-//                formLogin
-//                    .loginPage("/login")
-//                    .defaultSuccessUrl("/dashboard", false)
-////                    .failureUrl("/login?error=true")
-////                        .failureUrl("/login").
-//            )
             .logout(logout ->
                 logout
                     .logoutUrl("/logout")

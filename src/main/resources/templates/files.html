@@ -85,13 +85,12 @@
 
     <form action="/uploadFile" method="post" enctype="multipart/form-data" id="uploadForm" style="margin: 20px; padding: 0; * {margin: 0; padding: 0;}">
         <input type="file" name="file" required>
-<!--        <div th:if="${keys}">-->
             <label for="keyId">Select Key (optional):</label>
             <select name="keyId" id="keyId">
             <option value="">Select Key</option>
             <option th:each="key : ${keys}" th:value="${key.id}" th:text="${key.name + ' - ' + key.type}"></option>
         </select>
-<!--        </div>-->
+
         <button type="submit" id="uploadFileSubmit" style="display: inline-block;">Upload</button>
         <div th:if="${responseTime}">
             <br>
@@ -112,7 +111,6 @@
                     <span th:text="${file.fileName + ' - ' + file.fileType} + ' - ' + ${file.fileSize}"></span>
                     <button th:onclick="'downloadFile(' + ${file.id} + ')'" style="display: inline-block;">Download</button>
                     <button th:onclick="'deleteFile(' + ${file.id} + ')'" style="display: inline-block;">X</button>
-<!--                    <button th:onclick="'encryptFile(' + ${file.id} + ')'" style="display: inline-block;">Encrypt</button>-->
                 </div>
                 <div th:if="${file.skey}">
                     <br>
@@ -133,7 +131,7 @@
 <script>
     const keySelector = document.getElementById("keyId");
     const uploadFileSubmit = document.getElementById("uploadFileSubmit");
-    //If key is selected, change the button to say "Upload and Encrypt"
+    //If key is selected, change the button to say "Upload and Encrypt", instead of just "Upload"
     keySelector.addEventListener('change', () => {
         if (keySelector.value) uploadFileSubmit.innerText = "Upload and Encrypt";
         else uploadFileSubmit.innerText = "Upload";

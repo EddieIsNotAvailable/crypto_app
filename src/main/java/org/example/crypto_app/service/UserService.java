@@ -2,8 +2,6 @@ package org.example.crypto_app.service;
 
 import org.example.crypto_app.model.BaseUser;
 import org.example.crypto_app.repository.BaseUserRepository;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

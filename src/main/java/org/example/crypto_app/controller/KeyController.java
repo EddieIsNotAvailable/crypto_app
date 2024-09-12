@@ -9,7 +9,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -32,7 +31,6 @@ public class KeyController {
                 model.addAttribute("keys", keys);
             }
         } catch (RuntimeException e) {
-//            System.out.println("Error loading keys page: " + e.getMessage());
             model.addAttribute("error", e.getMessage());
         }
 
@@ -45,9 +43,7 @@ public class KeyController {
         try {
             keyService.createKey(keyName, keySelect);
             model.addAttribute("message", keySelect + " key created successfully");
-//            System.out.println("Key created successfully for user: " + user.getUsername());
         } catch (RuntimeException e) {
-//            System.out.println("Error creating key: " + e.getMessage());
             model.addAttribute("error", e.getMessage());
         }
         return "redirect:/keys";
@@ -58,7 +54,6 @@ public class KeyController {
         try {
             keyService.deleteKey(keyId);
         } catch (RuntimeException e) {
-//            System.out.println("Error deleting key: " + e.getMessage());
             return ResponseEntity.badRequest().body("Failed to delete key");
         }
         return ResponseEntity.ok().build();
@@ -70,7 +65,6 @@ public class KeyController {
             byte[] keyBytes = keyService.downloadKey(keyId);
             return ResponseEntity.ok().body(keyBytes);
         } catch (RuntimeException e) {
-//            System.out.println("Error downloading key: " + e.getMessage());
             model.addAttribute("error", e.getMessage());
             return ResponseEntity.badRequest().build();
         }

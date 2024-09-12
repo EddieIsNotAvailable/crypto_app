@@ -33,49 +33,27 @@ nav ul li a {
     color: black;
 }
 
-/*nav ul li:first-child a {*/
-/*    margin-left: -15px;*/
-/*}*/
-
 table {
     width: 100%;
     border-collapse: collapse;
 }
 
 th {
-    /*mso-border-between: 1px solid black;*/
-    /*border-inline: 1px solid black;*/
     min-width: 200px;
     text-align: left;
-    /*padding: .3em;*/
     border-bottom: 3px solid black;
 
 }
 
 th, td {
-    /*border-inline: 1px solid black;*/
-
     padding: .5em;
     text-align: left;
-    /*border-bottom: 1px solid black;*/
     border: 1px solid black;
 }
-
-/*th, td {*/
-/*    border: 1px solid black;*/
-/*    padding: 8px;*/
-/*    text-align: left;*/
-/*    min-width: 150px;*/
-/*    height: min-content;*/
-/*}*/
 
 th {
     background-color: #f2f2f2;
 }
-
-/*tr:hover {*/
-/*    background-color: #f5f5f5;*/
-/*}*/
 
 table td:last-child{
     border: none;
@@ -98,12 +76,7 @@ form div label {
     width: 100px;
 }
 
-/*form div input, form div select {*/
-/*    width: 200px;*/
-/*}*/
-
 form button {
-    /*margin-top: 10px;*/
     display: inline-block;
 }
 
@@ -113,7 +86,6 @@ table button {
     margin-right: .5em;
     border: none;
     cursor: pointer;
-    /*border-radius: 5px;*/
 }
 
 .row-number {

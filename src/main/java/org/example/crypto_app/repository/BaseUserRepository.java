@@ -4,7 +4,6 @@ import org.example.crypto_app.model.BaseUser;
 import org.example.crypto_app.model.CryptoKey;
 import org.example.crypto_app.model.UserFile;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;

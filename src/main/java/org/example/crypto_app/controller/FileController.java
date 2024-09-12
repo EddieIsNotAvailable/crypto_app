@@ -40,7 +40,6 @@ public class FileController {
             if(!keys.isEmpty()) model.addAttribute("keys", keys);
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
-            System.out.println("Error loading files page: " + e.getMessage());
         }
         return "files";
     }

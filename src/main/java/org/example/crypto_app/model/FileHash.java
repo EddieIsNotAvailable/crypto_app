@@ -11,8 +11,6 @@ import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.util.encoders.Hex;
 import org.example.crypto_app.model.enums.HashType;
 
-import java.security.MessageDigest;
-
 @Entity @Getter @Setter
 @NoArgsConstructor
 public class FileHash {

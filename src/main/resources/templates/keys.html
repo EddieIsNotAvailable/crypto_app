@@ -95,7 +95,6 @@
             </thead>
             <tbody>
             <tr th:each="key, iter : ${keys}" th:id="'key_' + ${key.id}">
-<!--                <td th:text="${iter.count}" style="max-width: 20px;"></td>-->
                 <td th:text="${key.name != null && key.name != '' ? key.name : key.id}"></td>
                 <td th:text="${key.type}"></td>
                 <td>
